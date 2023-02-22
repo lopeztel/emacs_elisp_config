@@ -36,46 +36,6 @@
 ;; Remember and restore the last cursor location of opened files
 (save-place-mode 1)
 
-;;------------------------------------Keybindings------------------------------------------
-;; Make ESC quit prompts
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-
-(use-package general
-  :after evil
-  :config
-  (general-create-definer efs/leader-keys
-    :keymaps '(normal insert visual emacs)
-    :prefix "SPC"
-    :global-prefix "C-SPC")
-
-  (efs/leader-keys
-    "t" '(:ignore t :which-key "toggles")
-    "tt" '(counsel-load-theme :which-key "choose theme")
-    "f" '(:ignore t :which-key "files")
-    "ff" 'counsel-find-file
-    "fr" 'counsel-recentf
-    "b" '(:ignore t :which-key "buffers")
-    "bs" 'ivy-switch-buffer
-    "bd" 'evil-delete-buffer
-    "bb" '(lambda () (interactive) (switch-to-buffer nil)) ; to previous buffer
-    "w" '(:ignore t :which-key "windows")
-    "wd" 'delete-window
-    "wo" 'delete-other-windows
-    "w1" 'split-window-vertically
-    "w2" 'split-window-horizontally
-    "o" '(:ignore t :which-key "org")
-    "og" 'org-agenda
-    "fde" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/Emacs.org")))))
-
-(general-create-definer my-local-leader-def
-  :prefix "SPC m")
-
-(my-local-leader-def 'normal go-mode-map
-  "ta" 'go-tag-add
-  "td" 'go-tag-remove
-  "tg" 'go-gen-test-dwim
-  )
-
 ;;-------------------------------------Transparent frames----------------------------------
 
 ;; Set frame transparency
@@ -137,6 +97,46 @@
 
 (require 'use-package)
 (setq use-package-always-ensure t)
+
+;;------------------------------------Keybindings------------------------------------------
+;; Make ESC quit prompts
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
+(use-package general
+  :after evil
+  :config
+  (general-create-definer efs/leader-keys
+    :keymaps '(normal insert visual emacs)
+    :prefix "SPC"
+    :global-prefix "C-SPC")
+
+  (efs/leader-keys
+    "t" '(:ignore t :which-key "toggles")
+    "tt" '(counsel-load-theme :which-key "choose theme")
+    "f" '(:ignore t :which-key "files")
+    "ff" 'counsel-find-file
+    "fr" 'counsel-recentf
+    "b" '(:ignore t :which-key "buffers")
+    "bs" 'ivy-switch-buffer
+    "bd" 'evil-delete-buffer
+    "bb" '(lambda () (interactive) (switch-to-buffer nil)) ; to previous buffer
+    "w" '(:ignore t :which-key "windows")
+    "wd" 'delete-window
+    "wo" 'delete-other-windows
+    "w1" 'split-window-vertically
+    "w2" 'split-window-horizontally
+    "o" '(:ignore t :which-key "org")
+    "og" 'org-agenda
+    "fde" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/Emacs.org")))))
+
+(general-create-definer my-local-leader-def
+  :prefix "SPC m")
+
+(my-local-leader-def 'normal go-mode-map
+  "ta" 'go-tag-add
+  "td" 'go-tag-remove
+  "tg" 'go-gen-test-dwim
+  )
 
 ;; -------------------------------------Evil mode (Vim like keybindings)------------------------------------------------
 (use-package evil
@@ -410,14 +410,13 @@
 ;;(setq org-log-done t)
 ;;(setq org-return-follows-link t)
 ;;(setq org-agenda-files (list "~/org/agenda.org"))
-
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(visual-fill-column org-bullets doom-modeline all-the-icons evil-collection use-package which-key-posframe org-jira evil doom-themes)))
+   '(visual-fill-column org-bullets hydra helpful ivy-prescient counsel ivy-rich ivy which-key doom-modeline all-the-icons doom-themes evil-collection evil general use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
