@@ -403,22 +403,48 @@
 (use-package visual-fill-column
   :hook (org-mode . efs/org-mode-visual-fill))
 
-;; Code formatting export from org mode (using minted)
+
+;;-------------------------------------------pdflatex publishing-----------------------------------------------------
+
+;; Code formatting export from org mode (using some packages)
 (setq org-latex-listings 'minted
       org-latex-packages-alist '(("" "minted"))
+      org-latex-packages-alist '(("" "svg"))
       org-latex-packages-alist '(("" "color"))
       org-latex-pdf-process
       '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
         "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
         "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
 
-;;orgmode settings
-;;(require 'org)
-;;(define-key global-map "\C-cl" 'org-store-link)
-;;(define-key global-map "\C-ca" 'org-agenda)
-;;(setq org-log-done t)
-;;(setq org-return-follows-link t)
-;;(setq org-agenda-files (list "~/org/agenda.org"))
+;;--------------------------------------------html publishing-----------------------------------------------------
+
+;; proper html publishing of all files, taken from: https://orgmode.org/worg/org-tutorials/org-publish-html-tutorial.html 
+(require 'ox-publish)
+(setq org-publish-use-timestamps-flag nil) ;;don't generate only when files change
+(setq org-publish-project-alist
+'(("org-files"
+   :base-directory "~/org/work/"
+   :base-extension "org"
+   :publishing-directory "~/work-dashboard/"
+   :recursive t
+   :publishing-function org-html-publish-to-html
+   :headline-levels 4
+   :auto-preamble t
+  )
+  ("org-assets"
+   :base-directory "~/org/work/media/"
+   :base-extension "jpg\\|png\\|gif\\|pdf\\|svg\\|diff"
+   :publishing-directory "~/work-dashboard/media/"
+   :recursive t
+   :publishing-function org-publish-attachment
+  )
+  ("work-dashboard" :components("org-files" "org-assets"))))
+
+;; live viewing
+(use-package simple-httpd)
+
+;;(use-package htmlize)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
