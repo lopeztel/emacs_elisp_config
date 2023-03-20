@@ -85,7 +85,8 @@
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
                          ("melpa-stable" . "https://stable.melpa.org/packages/")
                          ("org" . "https://orgmode.org/elpa/")
-                         ("elpa" . "https://elpa.gnu.org/packages/")))
+                         ("elpa" . "https://elpa.gnu.org/packages/")
+			                   ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
 
 (package-initialize)
 (unless package-archive-contents
@@ -115,6 +116,7 @@
     "tt" '(counsel-load-theme :which-key "choose theme")
     "f" '(:ignore t :which-key "files")
     "ff" 'counsel-find-file
+    "fs" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/init.el")))
     "fr" 'counsel-recentf
     "b" '(:ignore t :which-key "buffers")
     "bs" 'ivy-switch-buffer
@@ -126,8 +128,9 @@
     "w1" 'split-window-vertically
     "w2" 'split-window-horizontally
     "o" '(:ignore t :which-key "org")
-    "og" 'org-agenda
-    "fde" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/Emacs.org")))))
+    "oa" 'org-agenda
+    "oc" 'org-capture
+    "op" 'org-present ))
 
 (general-create-definer my-local-leader-def
   :prefix "SPC m")
@@ -190,7 +193,9 @@
 
 (use-package doom-modeline
   :init (doom-modeline-mode 1)
-  :custom ((doom-modeline-height 15)))
+  :custom ((doom-modeline-height 15)
+	   (doom-modeline-modal 1)
+	   (doom-modeline-modal-icon 1)))
 
 
 ;; -------------------------------------Which-key------------------------------------------------
@@ -348,24 +353,27 @@
   (setq org-agenda-start-with-log-mode t)
   (setq org-log-done 'time)
   (setq org-log-into-drawer t)
+  (setq org-return-follows-link t)
 
   (setq org-agenda-files
         '("~/org/Todos.org"
           "~/org/Agenda.org"
           "~/org/Birthdays.org"
-	  "~/org/Holidays.org"))
+	        "~/org/Holidays.org"
+	        "~/org/work/Todos.org"))
 
   (require 'org-habit)
   (add-to-list 'org-modules 'org-habit)
   (setq org-habit-graph-column 60)
 
   (setq org-todo-keywords
-    '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-      (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
+    '((sequence "TODO(t)" "|" "DONE(d)")
+      (sequence "OPEN(b)" "IN PROGRESS(p)" "REOPENED(ro)" "|""RESOLVED(rs)" "CLOSED(c)" )))
 
   (setq org-refile-targets
-    '(("Archive.org" :maxlevel . 1)
-      ("Tasks.org" :maxlevel . 1)))
+    '(("~/org/archive/Agenda-archive.org" :maxlevel . 2)
+      ("~/org/archive/Todos-archive.org" :maxlevel . 2)
+      ("~/org/archive/work/Todos-archive.org" :maxlevel . 2)))
 
   ;; Save Org buffers after refiling!
   (advice-add 'org-refile :after 'org-save-all-org-buffers)
@@ -444,6 +452,12 @@
 (use-package simple-httpd)
 
 ;;(use-package htmlize)
+
+;;-------------------------------------Org presentations--------------------------------------------
+
+(use-package org-present)
+
+(use-package ox-reveal)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
