@@ -367,8 +367,8 @@
   (setq org-habit-graph-column 60)
 
   (setq org-todo-keywords
-    '((sequence "TODO(t)" "|" "DONE(d)")
-      (sequence "OPEN(b)" "IN PROGRESS(p)" "REOPENED(ro)" "|""RESOLVED(rs)" "CLOSED(c)" )))
+    '((sequence "TODO(t)" "|" "DONE(d!)")
+      (sequence "OPEN(o)" "IN PROGRESS(i)" "REOPENED(r)" "|" "RESOLVED(s!)" "CLOSED(c!)")))
 
   (setq org-refile-targets
     '(("~/org/archive/Agenda-archive.org" :maxlevel . 2)
