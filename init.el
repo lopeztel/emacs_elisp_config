@@ -420,6 +420,10 @@
         ("j" "Journal" entry (file+datetree "~/org/journal.org")
          "* %?\nEntered on %U\n  %i\n  %a")))
 
+(use-package org-auto-tangle
+  :defer t
+  :hook (org-mode . org-auto-tangle-mode))
+
 ;;------------------------------------------------markdown-mode------------------------------------------------
 (use-package markdown-mode
   :ensure t
