@@ -83,10 +83,9 @@
 
 ;; Initialize package sources
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("melpa-stable" . "https://stable.melpa.org/packages/")
-                         ("org" . "https://orgmode.org/elpa/")
-                         ("elpa" . "https://elpa.gnu.org/packages/")
-			                   ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
+                         ("gnu" . "https://elpa.gnu.org/packages/")
+                         ("nongnu" . "https://elpa.nongnu.org/nongnu/")
+                         ("org" . "https://orgmode.org/elpa/")))
 
 (package-initialize)
 (unless package-archive-contents
@@ -106,6 +105,7 @@
 (use-package general
   :after evil
   :config
+  (setq evil-undo-system 'undo-redo)
   (general-create-definer efs/leader-keys
     :keymaps '(normal insert visual emacs)
     :prefix "SPC"
@@ -116,7 +116,6 @@
     "tt" '(counsel-load-theme :which-key "choose theme")
     "f" '(:ignore t :which-key "files")
     "ff" 'counsel-find-file
-    "fs" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/init.el")))
     "fr" 'counsel-recentf
     "b" '(:ignore t :which-key "buffers")
     "bs" 'ivy-switch-buffer
@@ -130,7 +129,8 @@
     "o" '(:ignore t :which-key "org")
     "oa" 'org-agenda
     "oc" 'org-capture
-    "op" 'org-present ))
+    "op" 'org-present
+    "fs" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/init.el")))))
 
 (general-create-definer my-local-leader-def
   :prefix "SPC m")
@@ -186,12 +186,14 @@
   (load-theme 'doom-nord t))
 
 
-(use-package all-the-icons)
+(use-package all-the-icons
+  :ensure t)
 ;;The first time you load your configuration on a new machine, you’ll
 ;;need to run `M-x all-the-icons-install-fonts` so that mode line
 ;;icons display correctly.
 
 (use-package doom-modeline
+  :ensure t
   :init (doom-modeline-mode 1)
   :custom ((doom-modeline-height 15)
 	   (doom-modeline-modal 1)
@@ -344,36 +346,37 @@
   (visual-line-mode 1))
 
 (use-package org
-  :pin org
+  :ensure org-contrib
+  :pin gnu
   :commands (org-capture org-agenda)
   :hook (org-mode . efs/org-mode-setup)
   :config
   (setq org-ellipsis " ▾")
   (setq org-image-actual-width nil)
   (setq org-agenda-start-with-log-mode t)
-  (setq org-log-done 'time)
+  (setq org-log-done 'note)
   (setq org-log-into-drawer t)
   (setq org-return-follows-link t)
 
   (setq org-agenda-files
         '("~/org/Todos.org"
+          "~/org/work/Todos.org"
           "~/org/Agenda.org"
           "~/org/Birthdays.org"
-	        "~/org/Holidays.org"
-	        "~/org/work/Todos.org"))
+	  "~/org/Holidays.org"))
 
   (require 'org-habit)
   (add-to-list 'org-modules 'org-habit)
   (setq org-habit-graph-column 60)
 
   (setq org-todo-keywords
-    '((sequence "TODO(t)" "|" "DONE(d!)")
-      (sequence "OPEN(o)" "IN PROGRESS(i)" "REOPENED(r)" "|" "RESOLVED(s!)" "CLOSED(c!)")))
+    '((sequence "TODO(t)" "|" "DONE(d@!)")
+      (sequence "OPEN(b)" "IN PROGRESS(p)" "REOPENED(r)" "|""RESOLVED(s@!)" "CLOSED(c@!)" )))
 
   (setq org-refile-targets
     '(("~/org/archive/Agenda-archive.org" :maxlevel . 2)
       ("~/org/archive/Todos-archive.org" :maxlevel . 2)
-      ("~/org/archive/work/Todos-archive.org" :maxlevel . 2)))
+      ("~/org/archive/work/Work-todos-archive.org" :maxlevel . 2)))
 
   ;; Save Org buffers after refiling!
   (advice-add 'org-refile :after 'org-save-all-org-buffers)
@@ -391,7 +394,6 @@
        ("batch" . ?b)
        ("note" . ?n)
        ("idea" . ?i)))
-;; TODO: Add org-agenda custom commands and org-capture templates here
   
   (efs/org-font-setup))
 
@@ -411,18 +413,55 @@
 (use-package visual-fill-column
   :hook (org-mode . efs/org-mode-visual-fill))
 
+;; Capture templates
+(setq org-capture-templates
+      '(("t" "Todo" entry (file+headline "~/org/Todos.org" "Captured todos")
+         "* TODO %?\n  %i\n  %a")
+        ("j" "Journal" entry (file+datetree "~/org/journal.org")
+         "* %?\nEntered on %U\n  %i\n  %a")))
+
+;;------------------------------------------------markdown-mode------------------------------------------------
+(use-package markdown-mode
+  :ensure t
+  :mode ("README\\.md\\'" . gfm-mode)
+  :init (setq markdown-command "multimarkdown"))
 
 ;;-------------------------------------------pdflatex publishing-----------------------------------------------------
+;; Taken from: https://www.aidanscannell.com/post/org-mode-resume/ for the resume thing
+  ;; Import ox-latex to get org-latex-classes and other funcitonality
+  ;; for exporting to LaTeX from org
+  (require 'ox-latex)
+    ;;:init
+    ;; code here will run immediately
+    ;;:config
+    ;; code here will run after the package is loaded
+    (setq org-latex-pdf-process
+          '("pdflatex -interaction nonstopmode -output-directory %o %f"
+            "bibtex %b"
+            "pdflatex -interaction nonstopmode -output-directory %o %f"
+            "pdflatex -interaction nonstopmode -output-directory %o %f"))
+    (setq org-latex-with-hyperref nil) ;; stop org adding hypersetup{author..} to latex export
+    ;; (setq org-latex-prefer-user-labels t)
+
+    ;; deleted unwanted file extensions after latexMK
+    (setq org-latex-logfiles-extensions
+          (quote ("lof" "lot" "tex~" "aux" "idx" "log" "out" "toc" "nav" "snm" "vrb" "dvi" "fdb_latexmk" "blg" "brf" "fls" "entoc" "ps" "spl" "bbl" "xmpi" "run.xml" "bcf" "acn" "acr" "alg" "glg" "gls" "ist")))
+
+    (unless (boundp 'org-latex-classes)
+      (setq org-latex-classes nil))
+
+(require 'ox-extra)
+(ox-extras-activate '(latex-header-blocks ignore-headlines))
 
 ;; Code formatting export from org mode (using some packages)
-(setq org-latex-listings 'minted
-      org-latex-packages-alist '(("" "minted"))
-      org-latex-packages-alist '(("" "svg"))
-      org-latex-packages-alist '(("" "color"))
-      org-latex-pdf-process
-      '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
+;;(setq org-latex-listings 'minted
+;;      org-latex-packages-alist '(("" "minted"))
+;;      org-latex-packages-alist '(("" "svg"))
+;;      org-latex-packages-alist '(("" "color"))
+;;      org-latex-pdf-process
+;;      '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+;;        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+;;        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
 
 ;;--------------------------------------------html publishing-----------------------------------------------------
 
@@ -451,6 +490,14 @@
 ;; live viewing
 (use-package simple-httpd)
 
+;; fixing face inheriting
+;; Fix broken face inheritance
+(let ((faces (face-list)))
+  (dolist (face faces)
+    (let ((inh (face-attribute face :inherit)))
+      (when (not (memq inh faces))
+        (set-face-attribute face nil :inherit nil)))))
+
 ;;(use-package htmlize)
 
 ;;-------------------------------------Org presentations--------------------------------------------
@@ -464,8 +511,10 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(org-safe-remote-resources
+   '("\\`https://fniessen\\.github\\.io/org-html-themes/org/theme-readtheorg\\.setup\\'"))
  '(package-selected-packages
-   '(visual-fill-column org-bullets hydra helpful ivy-prescient counsel ivy-rich ivy which-key doom-modeline all-the-icons doom-themes evil-collection evil general use-package)))
+   '(org-present visual-fill-column org-bullets doom-modeline all-the-icons evil-collection use-package which-key-posframe org-jira evil doom-themes)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
