@@ -370,8 +370,8 @@
   (setq org-habit-graph-column 60)
 
   (setq org-todo-keywords
-    '((sequence "TODO(t)" "|" "DONE(d@!)")
-      (sequence "OPEN(b)" "IN PROGRESS(p)" "REOPENED(r)" "|""RESOLVED(s@!)" "CLOSED(c@!)" )))
+    '((sequence "TODO(t)" "|" "DONE(d@/!)")
+      (sequence "OPEN(b)" "IN PROGRESS(p)" "REOPENED(r)" "|""RESOLVED(s@/!)" "CLOSED(c@/!)" )))
 
   (setq org-refile-targets
     '(("~/org/archive/Agenda-archive.org" :maxlevel . 2)
@@ -422,7 +422,9 @@
 
 (use-package org-auto-tangle
   :defer t
-  :hook (org-mode . org-auto-tangle-mode))
+  :hook (org-mode . org-auto-tangle-mode)
+  :config
+  (setq org-auto-tangle-default t))
 
 ;;------------------------------------------------markdown-mode------------------------------------------------
 (use-package markdown-mode
@@ -473,7 +475,7 @@
 (require 'ox-publish)
 (setq org-publish-use-timestamps-flag nil) ;;don't generate only when files change
 (setq org-publish-project-alist
-'(("org-files"
+'(("org-work-files"
    :base-directory "~/org/work/"
    :base-extension "org"
    :publishing-directory "~/work-dashboard/"
@@ -482,14 +484,30 @@
    :headline-levels 4
    :auto-preamble t
   )
-  ("org-assets"
+  ("org-presentation-files"
+   :base-directory "~/org/work/Presentations/"
+   :base-extension "org"
+   :publishing-directory "~/work-dashboard/Presentations/"
+   :recursive t
+   :publishing-function org-html-publish-to-html
+   :headline-levels 4
+   :auto-preamble t
+  )
+  ("org-work-assets"
    :base-directory "~/org/work/media/"
    :base-extension "jpg\\|png\\|gif\\|pdf\\|svg\\|diff"
    :publishing-directory "~/work-dashboard/media/"
    :recursive t
    :publishing-function org-publish-attachment
   )
-  ("work-dashboard" :components("org-files" "org-assets"))))
+  ("org-presentation-assets"
+   :base-directory "~/org/work/Presentations/media/"
+   :base-extension "jpg\\|png\\|gif\\|pdf\\|svg\\|diff"
+   :publishing-directory "~/work-dashboard/Presentations/media/"
+   :recursive t
+   :publishing-function org-publish-attachment
+  )
+  ("work-dashboard" :components("org-work-files" "org-work-assets" "org-presentation-files" "org-presentation-assets"))))
 
 ;; live viewing
 (use-package simple-httpd)
