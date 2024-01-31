@@ -38,11 +38,15 @@
 
 ;;-------------------------------------Transparent frames----------------------------------
 
-;; Set frame transparency
-(set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
-(add-to-list 'default-frame-alist `(alpha . ,efs/frame-transparency))
-;;(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
-;;(add-to-list 'default-frame-alist '(fullscreen . maximized))
+;; Set frame transparency for X11
+;; (set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
+;; (add-to-list 'default-frame-alist `(alpha . ,efs/frame-transparency))
+;; (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+;; (add-to-list 'default-frame-alist '(fullscreen . maximized))
+
+;; Set frame transparency for Wayland
+(set-frame-parameter nil 'alpha-background 85)
+(add-to-list 'default-frame-alist `(alpha-background . 85))
 
 ;; Disable line numbers for some modes
 (dolist (mode '(org-mode-hook
@@ -295,36 +299,6 @@
                   (org-level-6 . 1.1)
                   (org-level-7 . 1.1)
                   (org-level-8 . 1.1)))
-    (set-face-attribute (car face) nil :font "Source Code Pro" :weight 'regular :height (cdr face)))
-
-  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
-  (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
-  (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
-  (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
-  (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
-  (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch))
-
-(defun efs/org-font-setup ()
-  ;; Replace list hyphen with dot
-  (font-lock-add-keywords 'org-mode
-                          '(("^ *\\([-]\\) "
-                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
-
-  ;; Set faces for heading levels
-  (dolist (face '((org-level-1 . 1.2)
-                  (org-level-2 . 1.1)
-                  (org-level-3 . 1.05)
-                  (org-level-4 . 1.0)
-                  (org-level-5 . 1.1)
-                  (org-level-6 . 1.1)
-                  (org-level-7 . 1.1)
-                  (org-level-8 . 1.1)))
     (set-face-attribute (car face) nil :font "FiraCode Nerd Font Mono" :weight 'regular :height (cdr face)))
 
   ;; Ensure that anything that should be fixed-pitch in Org files appears that way
@@ -371,8 +345,9 @@
 
   (setq org-todo-keywords
     '((sequence "TODO(t)" "|" "DONE(d@/!)")
-      (sequence "OPEN(b)" "IN PROGRESS(p)" "REOPENED(r)" "|""RESOLVED(s@/!)" "CLOSED(c@/!)" )))
+      (sequence "OPEN(o)" "IN PROGRESS(i)" "REOPENED(r)" "|""RESOLVED(s@/!)" "CLOSED(c@/!)" "WON'T DO(w@/!)")))
 
+  
   (setq org-refile-targets
     '(("~/org/archive/Agenda-archive.org" :maxlevel . 2)
       ("~/org/archive/Todos-archive.org" :maxlevel . 2)
@@ -413,9 +388,14 @@
 (use-package visual-fill-column
   :hook (org-mode . efs/org-mode-visual-fill))
 
+;; Modern org
+;;(use-package org-modern
+;;    :hook (org-mode . org-modern-mode))
+;;(global-org-modern-mode)
+
 ;; Capture templates
 (setq org-capture-templates
-      '(("t" "Todo" entry (file+headline "~/org/Todos.org" "Captured todos")
+      '(("t" "Todo" entry (file+headline "~/org/work/Todos.org" "Captured todos")
          "* TODO %?\n  %i\n  %a")
         ("j" "Journal" entry (file+datetree "~/org/journal.org")
          "* %?\nEntered on %U\n  %i\n  %a")))
@@ -426,6 +406,40 @@
   :config
   (setq org-auto-tangle-default t))
 
+;;------------------------------------------------org-modern---------------------------------------------------
+;; Add frame borders and window dividers
+; (modify-all-frames-parameters
+;  '((right-divider-width . 40)
+;    (internal-border-width . 40)))
+; (dolist (face '(window-divider
+;                 window-divider-first-pixel
+;                 window-divider-last-pixel))
+;   (face-spec-reset-face face)
+;   (set-face-foreground face (face-attribute 'default :background)))
+; (set-face-background 'fringe (face-attribute 'default :background))
+;
+; (setq
+;  ;; Edit settings
+;  org-auto-align-tags nil
+;  org-tags-column 0
+;  org-catch-invisible-edits 'show-and-error
+;  org-special-ctrl-a/e t
+;  org-insert-heading-respect-content t
+;
+;  ;; Org styling, hide markup etc.
+;  org-hide-emphasis-markers t
+;  org-pretty-entities t
+;  org-ellipsis "…"
+;
+;  ;; Agenda styling
+;  org-agenda-tags-column 0
+;  org-agenda-block-separator ?─
+;  org-agenda-time-grid
+;  '((daily today require-timed)
+;    (800 1000 1200 1400 1600 1800 2000)
+;    " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+;  org-agenda-current-time-string
+;  "◀── now ─────────────────────────────────────────────────")
 ;;------------------------------------------------markdown-mode------------------------------------------------
 (use-package markdown-mode
   :ensure t
