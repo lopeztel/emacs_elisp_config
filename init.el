@@ -360,15 +360,11 @@
     '((:startgroup)
        ; Put mutually exclusive tags here
        (:endgroup)
-       ("@errand" . ?E)
-       ("@home" . ?H)
-       ("@work" . ?W)
-       ("agenda" . ?a)
-       ("planning" . ?p)
-       ("publish" . ?P)
-       ("batch" . ?b)
+       ("personal" . ?p)
+       ("work" . ?w)
+       ("exercise" . ?e)
        ("note" . ?n)
-       ("idea" . ?i)))
+       ("TOC" . ?T)))
   
   (efs/org-font-setup))
 
@@ -400,11 +396,23 @@
         ("j" "Journal" entry (file+datetree "~/org/journal.org")
          "* %?\nEntered on %U\n  %i\n  %a")))
 
+(setq org-src-preserve-indentation t)
 (use-package org-auto-tangle
   :defer t
   :hook (org-mode . org-auto-tangle-mode)
   :config
   (setq org-auto-tangle-default t))
+
+;; Autogeneration of Table Of Contents
+(if (require 'toc-org nil t)
+    (progn
+      (add-hook 'org-mode-hook 'toc-org-mode)
+
+      ;; enable in markdown, too
+      (add-hook 'markdown-mode-hook 'toc-org-mode)
+      (define-key markdown-mode-map (kbd "\C-c\C-o") 'toc-org-markdown-follow-thing-at-point))
+(warn "toc-org not found"))
+    
 
 ;;------------------------------------------------org-modern---------------------------------------------------
 ;; Add frame borders and window dividers
@@ -550,7 +558,7 @@
  '(org-safe-remote-resources
    '("\\`https://fniessen\\.github\\.io/org-html-themes/org/theme-readtheorg\\.setup\\'"))
  '(package-selected-packages
-   '(org-present visual-fill-column org-bullets doom-modeline all-the-icons evil-collection use-package which-key-posframe org-jira evil doom-themes)))
+   '(toc-org org-present visual-fill-column org-bullets doom-modeline all-the-icons evil-collection use-package which-key-posframe org-jira evil doom-themes)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
